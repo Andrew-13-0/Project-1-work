@@ -132,7 +132,13 @@ class Cart:
         for product in self.___cart_items:
             total += product.price
         print(f"Total: ${total}\n")
-        
+        return total
+
+    # additional method to clear cart
+    def clear_cart(self):
+        self.___cart_items.clear()  
+    
+
 #Testing prints
 print("\t\tCART CLASS TEST\n")
 
@@ -169,31 +175,42 @@ class User:
         # removes item from cart    
     def remove_from_cart(self,product_id):
         self.cart.remove_product(product_id)
-        print(f"{self.name} removed from cart\n")
         
         # checks out the product(s)
-    def checkout(self):
-        print(f'Total: ${self.cart.calculate_total()}')
-        print("-"*30)
-        for product in self.Cart.cart_items:
-            print(f"{product.name} checked out\n")
+    def checkout(self,discount=None):
 
+        # prints user name calculates total
+        print(self.name,"is checking out\n")
+
+        # applies discount if discount is not None
+        if discount:
+            discount.apply_discount(self.cart.calculate_total())
+        else:
+            print(f"No discount applied.\nTotal: ${self.cart.calculate_total()}\n")
+
+        #clears cart
+        self.cart.clear_cart()
+        
+        
 #Testing prints
 print("\t\tUSER CLASS TEST\n")
+print("\tUser1 TEST\n")
 
-#create user as object and adds Physical products to cart
+#create user as object. adds and removes Physical products to cart
 User1 = User(id("John Doe"),"John Doe",cart)
+User1.add_to_cart(Pitem1)
+User1.remove_from_cart(Pitem1.product_id)
 User1.add_to_cart(Pitem1)
 User1.add_to_cart(Pitem2)
 
-#create user as object and adds Digital products to cart
+print("\tUser2 TEST\n")
+
+#create user as object. adds and removes Digital products to cart
 User2 = User(id("Jane Doe"),"Jane Doe",cart)
 User2.add_to_cart(Ditem1)
+User2.remove_from_cart(Ditem1.product_id)
+User2.add_to_cart(Ditem1)
 User2.add_to_cart(Ditem2)
-
-
-# checks out
-User1.checkout()
 
 #------------Discount Class------------
 class Discount(ABC):
@@ -206,7 +223,7 @@ class Discount(ABC):
     def apply_discount(self,total_amount):
         pass
 
-#tests if abstract method works
+#tests if abstract method works (intentionally creates error)
 #discount = Discount(1000,0.10)
 
 #------------PercentageDiscount class------------
@@ -258,3 +275,17 @@ print("discount2 amount:",discount2.amount,"\n")
 #tests the apply_discount method
 discount2.apply_discount(2000)
 
+#------------Continued User Class Test------------
+print("\t\tUSER CLASS TEST CONTINUED\n")
+
+#creates discount objects (PercentageDiscount discounts total to fully test Percent discount)
+Per = PercentageDiscount(User1.cart.calculate_total(), 0.10)
+Fix = FixedAmountDiscount(20)
+
+# checks out with Fix (FixedAmountDiscount Object) and Per (PercentageDiscount Object)
+User1.checkout(Per)
+User2.checkout(Fix)
+
+# checks out to test id cart is empty
+User1.checkout()
+User2.checkout()
